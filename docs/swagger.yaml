@@ -1,0 +1,47 @@
+basePath: /
+host: localhost:1323
+info:
+  contact: {}
+  description: This is a sample Echo API with Swagger documentation.
+  title: MyAPI
+  version: "1.0"
+paths:
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: 유저의 ID를 가져온다.
+      parameters:
+      - description: user ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 유저를 가져온다.
+  /user/{name}:
+    get:
+      consumes:
+      - application/json
+      description: 유저의 이름을 가져온다.
+      parameters:
+      - description: name of the user
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 유저를 가져온다.
+swagger: "2.0"
