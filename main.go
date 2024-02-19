@@ -1,12 +1,15 @@
 package main
 
 import (
-	_ "gosampleswagger/docs"
+	"fmt"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	echoSwagger "github.com/swaggo/echo-swagger"
+	"github.com/labstack/gommon/log"
+
+	_ "gosampleswagger/docs"
+
+	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // Swagger 문서용 주석
@@ -16,23 +19,21 @@ import (
 // @host localhost:1323
 // @BasePath /
 func main() {
-	e := echo.New()
+	r := mux.NewRouter()
 
-	// Middelware
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	r.Use(LoggerMiddleware)
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Hello, World!")
 	})
 
-	e.GET("/user/:name", getUserName)
+	r.HandleFunc("/user/{name}", getUserName).Methods("GET")
+	r.HandleFunc("/user", getUserId).Methods("GET")
 
-	e.GET("/user", getUserId)
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
-
-	e.Logger.Fatal(e.Start(":1323"))
+	http.Handle("/", r)
+	http.ListenAndServe(":1323", nil)
 }
 
 // @Summary 유저를 가져온다.
@@ -42,9 +43,10 @@ func main() {
 // @Param name path string true "name of the user"
 // @Success 200 string name
 // @Router /user/{name} [get]
-func getUserName(c echo.Context) error {
-	user := c.Param("name")
-	return c.String(http.StatusOK, "user: "+user)
+func getUserName(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	user := vars["name"]
+	fmt.Fprintf(w, "user: %s", user)
 }
 
 // @Summary 유저를 가져온다.
@@ -54,7 +56,15 @@ func getUserName(c echo.Context) error {
 // @Param id query string true "user ID"
 // @Success 200 string id
 // @Router /user [get]
-func getUserId(c echo.Context) error {
-	userId := c.QueryParam("id")
-	return c.String(http.StatusOK, "userId: "+userId)
+func getUserId(w http.ResponseWriter, r *http.Request) {
+	userId := r.URL.Query().Get("id")
+	fmt.Fprintf(w, "userId: %s", userId)
+}
+
+// LoggerMiddleware는 Mux에서 사용할 로거 미들웨어입니다.
+func LoggerMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s %s", r.Method, r.RequestURI)
+		next.ServeHTTP(w, r)
+	})
 }
