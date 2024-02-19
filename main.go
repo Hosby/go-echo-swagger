@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/labstack/gommon/log"
-
 	_ "gosampleswagger/docs"
 
 	"github.com/gorilla/mux"
@@ -20,8 +18,6 @@ import (
 // @BasePath /
 func main() {
 	r := mux.NewRouter()
-
-	r.Use(LoggerMiddleware)
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "Hello, World!")
@@ -59,12 +55,4 @@ func getUserName(w http.ResponseWriter, r *http.Request) {
 func getUserId(w http.ResponseWriter, r *http.Request) {
 	userId := r.URL.Query().Get("id")
 	fmt.Fprintf(w, "userId: %s", userId)
-}
-
-// LoggerMiddleware는 Mux에서 사용할 로거 미들웨어입니다.
-func LoggerMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("%s %s", r.Method, r.RequestURI)
-		next.ServeHTTP(w, r)
-	})
 }
