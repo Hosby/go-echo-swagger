@@ -1,11 +1,68 @@
 basePath: /
+definitions:
+  main.Error:
+    properties:
+      errors:
+        items:
+          $ref: '#/definitions/main.Errors'
+        type: array
+    type: object
+  main.Errors:
+    properties:
+      code:
+        type: integer
+      detail:
+        type: string
+      title:
+        type: string
+    type: object
 host: localhost:1323
 info:
-  contact: {}
-  description: This is a sample Echo API with Swagger documentation.
-  title: MyAPI
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample gorilla mux API with Swagger documentation.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Go Swagger Sample API
   version: "1.0"
 paths:
+  /board/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 게시판의 ID를 가져온다.
+      parameters:
+      - description: board ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: 게시판을 가져온다.
+      tags:
+      - board
   /user:
     get:
       consumes:
@@ -24,7 +81,21 @@ paths:
           description: OK
           schema:
             type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
       summary: 유저를 가져온다.
+      tags:
+      - user
   /user/{name}:
     get:
       consumes:
@@ -43,5 +114,22 @@ paths:
           description: OK
           schema:
             type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
       summary: 유저를 가져온다.
+      tags:
+      - user
+securityDefinitions:
+  XAuth:
+    type: basic
 swagger: "2.0"
